@@ -8,7 +8,7 @@
 ```text
     harness-plugin/
     ├── .claude-plugin/           # 元数据目录（可选）
-    │   └── plugin.json            # plugin 清单
+    │   └── plugin.json           # plugin 清单
     ├── skills/                   # Skills
     │   ├── code-reviewer/
     │   │   └── SKILL.md
