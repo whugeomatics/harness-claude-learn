@@ -1,144 +1,240 @@
-# Harness Engineering Demonstration
+# Spring Boot Extension Plugin
 
-A showcase of Claude Code's advanced hook system for automated development workflows. This project demonstrates how to enhance code safety, quality, and productivity through customizable hooks and skills.
+一个专门为 Spring Boot 开发设计的 Claude Code 插件，提供自动化的开发工作流、代码质量保证和安全扫描功能。
 
-## 🚀 Features
+## 🎯 插件特性
 
-### 1. Automated Git Workflow
-- **Pre-commit Validation**: Automatically checks git repository status and user configuration
-- **Conventional Commits**: Generates standardized commit messages based on changes
-- **Project-specific Config**: Forces consistent git identity for open source projects
+### 1. 自动化 Git 工作流
+- **提交前验证**：自动检查仓库状态和用户配置
+- **规范提交信息**：基于更改内容生成标准化的提交信息
+- **项目配置**：为开源项目强制使用一致的 git 身份配置
 
-### 2. Command Safety
-- **Dangerous Command Blocking**: Prevents execution of potentially harmful commands
-- **Pattern-based Detection**: Blocks `rm -rf`, system destruction, and other risky operations
-- **Override Capability**: Allows explicit confirmation for legitimate dangerous commands
+### 2. 命令安全防护
+- **危险命令拦截**：阻止 potentially harmful 命令的执行
+- **模式检测**：拦截 `rm -rf`、系统破坏和其他风险操作
+- **覆盖能力**：允许通过显式确认执行合法的危险命令
 
-### 3. Code Quality Assurance
-- **Java Lint Integration**: Automated linting after code edits
-- **Multi-tool Support**: Maven, Gradle, Checkstyle, Google Java Format, and javac
-- **Failure Prevention**: Blocks further work until lint issues are resolved
+### 3. Java 代码质量保证
+- **自动代码检查**：编辑 Java 文件后自动运行代码检查
+- **多工具支持**：Maven、Gradle、Checkstyle、Google Java Format 和 javac
+- **失败预防**：代码检查问题必须解决才能继续工作
 
-### 4. Security Scanning
-- **Secret Detection**: Automatically identifies hardcoded credentials and API keys
-- **Provider Coverage**: AWS, Google, GitHub, Slack, OpenAI, and more
-- **Smart Masking**: Exposes patterns without exposing actual values
+### 4. 安全扫描
+- **密钥检测**：自动识别硬编码的凭证和 API 密钥
+- **提供商覆盖**：AWS、Google、GitHub、Slack、OpenAI 等
+- **智能遮蔽**：暴露模式而不暴露实际值
 
-### 5. Thread Pool Management (Java Projects)
-- **Automatic Dependency Injection**: Adds `base-executor-starter` to Java Maven projects
-- **YAML Configuration Generation**: Creates thread pool configurations
-- **Business Code Generation**: Produces optimized async and scheduled task implementations
-- **Proactive Monitoring**: Prevents unmonitored bare thread pool usage
+### 5. 线程池管理（Java 项目）
+- **自动依赖注入**：为 Java Maven 项目添加 `base-executor-starter`
+- **配置文件生成**：创建线程池配置
+- **业务代码生成**：生成优化的异步和定时任务实现
+- **主动监控**：防止未监控的原始线程池使用
 
-## 📁 Project Structure
+## 📦 安装
 
-```
-├── .claude/
-│   ├── hooks/                    # Hook scripts
-│   │   ├── command-guard.sh     # Command safety
-│   │   ├── java-lint.sh         # Java code quality
-│   │   ├── secret-scan.sh       # Security scanning
-│   │   └── session-summary.sh    # Session logging
-│   ├── skills/                   # Custom skills
-│   │   ├── git-commit-check/    # Git workflow management
-│   │   ├── git-commit/          # Internal commit generation
-│   │   └── executor-dependency/ # Thread pool management
-│   ├── settings.json            # Hook configuration
-├── CLAUDE.md                    # Project guidance for Claude Code
-└── README.md                    # This file
+### 开发环境安装
+```bash
+# 克隆插件仓库
+git clone https://github.com/whugeomatics/boot-extension-plugin.git
+
+# 将插件复制到 Claude Code 插件目录
+cp -r boot-extension-plugin ~/.claude/plugins/
 ```
 
-## 🛠️ How It Works
+### 使用方式
+1. 启动 Claude Code
+2. 在 Spring Boot 项目中使用以下命令激活插件功能：
+   - `/git-commit-check` - Git 提交检查
+   - `/executor-dependency` - 线程池依赖管理
 
-### Git Commit Process
-1. User triggers `git commit`, `git push`, or uses `/commit`
-2. `/git-commit-check` skill runs pre-commit validations
-3. System generates conventional commit message
-4. Changes are committed automatically
+## 🛠️ 核心功能详解
 
-### Hook System Flow
-1. **PreToolUse**: Runs before any command execution
-2. **PostToolUse**: Runs after file write/edit operations
-3. **Stop**: Runs when the session ends
+### Git 工作流自动化
+```bash
+# 使用规范提交
+git add .
+/commit
 
-### Code Quality Enforcement
-1. After editing Java files, automatic linting runs
-2. Multiple lint tools attempt in priority order
-3. Issues must be resolved before continuing
+# 或者直接使用
+git commit -m "feat: add new feature"
+```
 
-## 🔧 Skills Overview
+**工作流程**：
+1. 用户触发 `git commit`、`git push` 或使用 `/commit`
+2. `/git-commit-check` 技能运行提交前验证
+3. 系统生成规范的提交信息
+4. 自动提交更改
+
+### 线程池管理
+当代码中检测到线程池相关关键词时，插件会：
+1. 自动检测 Maven 项目
+2. 注入 `base-executor-starter` 依赖
+3. 生成线程池配置文件
+4. 创建优化的异步和定时任务示例代码
+
+### 代码质量检查
+编辑 Java 文件后，插件会按优先级顺序尝试多种代码检查工具：
+1. Maven checkstyle（如果存在 pom.xml）
+2. Gradle checkstyle（如果存在 build.gradle）
+3. 独立 checkstyle 二进制文件
+4. google-java-format（格式化）
+5. javac -Xlint（基本语法警告）
+
+## 🏗️ 项目结构
+
+```
+boot-extension-plugin/
+├── .claude-plugin/               # 插件元数据
+│   ├── plugin.json              # 插件清单
+│   └── marketplace.json         # 市场/仓库配置
+├── .claude/skills/              # 自定义技能
+│   ├── test/                    # 集成测试技能
+│   └── verify/                  # 配置验证技能
+├── skills/                      # 技能定义目录
+│   ├── executor-dependency/    # 线程池依赖管理
+│   ├── git-commit/              # 内部提交生成
+│   └── git-commit-check/       # Git 提交检查入口
+├── scripts/                     # 钩子脚本
+│   ├── command-guard.sh        # 命令安全防护
+│   ├── java-lint.sh           # Java 代码质量检查
+│   ├── secret-scan.sh         # 安全扫描
+│   └── session-summary.sh     # 会话摘要
+├── CLAUDE.md                    # 项目指导文档
+├── CLAUDE.local.md             # 个人配置（已加入 .gitignore）
+└── README.md                    # 说明文档
+```
+
+## 🔧 技能列表
 
 ### `/git-commit-check`
-- **Purpose**: Sole entry point for all git operations
-- **Triggers**: `git commit`, `git push`, `/commit`
-- **Features**: Repository validation, user config enforcement
+- **用途**：所有 git 操作的唯一入口点
+- **触发器**：`git commit`、`git push`、`/commit`
+- **功能**：仓库验证、用户配置强制执行
 
 ### `/executor-dependency`
-- **Purpose**: Java thread pool dependency management
-- **Triggers**: Thread pool keywords, async/concurrent code patterns
-- **Features**: Auto-detects Maven projects, injects dependencies, generates configs
+- **用途**：Java 线程池依赖管理
+- **触发器**：线程池关键词、异步/并发代码模式
+- **功能**：自动检测 Maven 项目、注入依赖、生成配置
 
-## 📊 Hook Execution Timeline
+### `/verify`
+- **用途**：验证插件配置和技能定义
+- **功能**：检查 JSON 配置语法、验证 YAML 前置格式
 
+### `/test`
+- **用途**：运行插件集成测试
+- **功能**：测试所有技能的基本功能、验证钩子脚本执行
+
+## 📋 钩子系统
+
+### PreToolUse（命令执行前）
+- `scripts/command-guard.sh` - 危险命令拦截
+
+### PostToolUse（文件编辑后）
+- `scripts/java-lint.sh` - Java 代码质量检查
+- `scripts/secret-scan.sh` - 安全扫描
+
+### Stop（会话结束）
+- `scripts/session-summary.sh` - 会话摘要记录
+
+## 🔐 安全特性
+
+### 命令防护规则
+- 系统破坏防护
+- 磁盘操作拦截
+- 权限提升检测
+- Fork 炸弹防护
+- 远程代码执行拦截
+- 关键文件保护
+
+### 密钥扫描模式
+- AWS/GitHub/Slack token
+- 数据库凭证
+- API 密钥
+- 私钥和证书
+- 云服务认证
+
+## 🚀 最佳实践
+
+### 对于开发者
+1. 使用 `/commit` 进行标准化的 git 操作
+2. 确保 Java 项目遵循代码检查标准
+3. 将密钥存储在环境变量或密钥管理器中
+4. 使用提供的技能处理常见模式
+
+### 对于插件维护者
+1. 定期更新钩子脚本
+2. 审查被拦截命令的误报
+3. 维护密钥扫描模式
+4. 更新代码检查工具配置
+
+## 🎯 使用场景
+
+### Spring Boot 项目初始化
+```bash
+# 创建新的 Spring Boot 项目
+spring init --dependencies=web,actuator my-app
+
+# 进入项目目录
+cd my-app
+
+# 使用插件初始化
+/verify  # 验证配置
+/test    # 运行测试
 ```
-User Action → PreToolUse Hook → Tool Execution → PostToolUse Hook → Stop Hook
+
+### 异步任务开发
+```java
+// 当检测到以下模式时，插件会自动生成配置
+@Service
+public class OrderService {
+    
+    // 异步处理订单
+    @Async
+    public void processOrder(Order order) {
+        // 业务逻辑
+    }
+    
+    // 定时任务
+    @Scheduled(fixedRate = 5000)
+    public void reportCurrentTime() {
+        // 定时任务逻辑
+    }
+}
 ```
 
-## 🔐 Security Features
+## 📈 性能优化
 
-### Command Guard Rules
-- System destruction prevention
-- Disk operations blocking
-- Permission escalation detection
-- Fork bomb protection
-- Remote code execution blocking
-- Critical file protection
+1. **快速反馈**：代码检查立即执行，无需等待
+2. **智能检测**：只对相关文件运行检查
+3. **可配置**：可以根据项目需求调整检查规则
+4. **错误预防**：在开发早期发现问题
 
-### Secret Scanning Patterns
-- AWS/GitHub/Slack tokens
-- Database credentials
-- API keys
-- Private keys and certificates
-- Cloud service authentication
+## 🤝 贡献指南
 
-## 🎯 Best Practices
+欢迎贡献代码或提出建议：
 
-### For Developers
-1. Use `/commit` for standardized git operations
-2. Ensure Java projects follow lint standards
-3. Store secrets in environment variables or secrets managers
-4. Use the provided skills for common patterns
+1. Fork 项目
+2. 创建功能分支 (`git checkout -b feature/AmazingFeature`)
+3. 提交更改 (`git commit -m 'Add some AmazingFeature'`)
+4. 推送到分支 (`git push origin feature/AmazingFeature`)
+5. 打开 Pull Request
 
-### For Maintainers
-1. Regularly update hook scripts
-2. Review blocked commands for false positives
-3. Maintain secret scanning patterns
-4. Update lint tool configurations
+## 📄 许可证
 
-## 🚀 Getting Started
+本项目采用 MIT 许可证 - 查看 [LICENSE](LICENSE) 文件了解详情。
 
-1. Clone this repository
-2. Explore the hook scripts in `.claude/hooks/`
-3. Study the skill implementations in `.claude/skills/`
-4. Customize hooks for your own project needs
+## 🆘 故障排除
 
-## 📈 Benefits
+### 常见问题
+1. **技能无法识别**：检查 `.claude-plugin/plugin.json` 配置
+2. **钩子脚本不执行**：确认脚本有执行权限
+3. **Git 提交失败**：检查仓库状态和用户配置
 
-- **Reduced Errors**: Automated checks prevent common mistakes
-- **Consistent Standards**: Enforced coding and commit standards
-- **Improved Security**: Continuous secret scanning and command blocking
-- **Increased Productivity**: Automated workflows reduce manual work
-- **Better Visibility**: Session logging for development awareness
-
-## 🤝 Contributing
-
-To contribute to this demonstration project:
-
-1. Review the hook implementations
-2. Test skills in your own environment
-3. Provide feedback on patterns and configurations
-4. Suggest improvements to documentation
+### 调试方法
+1. 使用 `/verify` 验证配置
+2. 查看 Claude Code 日志
+3. 手动运行钩子脚本进行测试
 
 ---
 
-*This project showcases the power of Claude Code's extensibility through hooks and custom skills, providing a foundation for automated development workflows.*
+*这个插件展示了 Claude Code 的扩展能力，通过自定义技能和钩子系统为 Spring Boot 开发提供自动化的工作流解决方案。*
