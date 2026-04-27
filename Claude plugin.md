@@ -1,12 +1,16 @@
 # 新建插件
 
+> 本文档主要记录 **Claude Code** 插件与 marketplace 的安装结构。
+> Codex 运行时使用 `.codex-plugin/plugin.json` 和 `.agents/plugins/marketplace.json`，两者与 Claude Code 的 `.claude-plugin/` 配置并行维护。
+> 通用能力应放在 `skills/`、`agents/`、`hooks/`、`scripts/`，平台专有安装说明应分别写清楚。
+
 ## 标准的 Plugin 插件结构
 
 >
 参考文档：[Claude Plugin docs](https://code.claude.com/docs/zh-CN/plugins-reference#plugin-%E7%9B%AE%E5%BD%95%E7%BB%93%E6%9E%84)
 
 ```text
-    harness-plugin/
+    boot-extension-plugin/
     ├── .claude-plugin/           # 元数据目录（可选）
     │   └── plugin.json           # plugin 清单
     ├── skills/                   # Skills

@@ -1,30 +1,43 @@
 # Spring Boot Extension Plugin
 
-一个专门为 Spring Boot 开发设计的 Claude Code 插件，提供自动化的开发工作流、代码质量保证和安全扫描功能。
+一个专门为 Spring Boot 开发设计的 **Claude Code 优先** AI 编程插件，提供自动化的开发工作流、代码质量保证和安全扫描功能。本仓库也提供
+Codex plugin manifest，用于在 Codex 中复用通用 skills。
+
+本仓库同时维护 Claude Code 与 Codex 的入口配置：
+
+- Claude Code 入口：`.claude-plugin/plugin.json`，用于完整插件能力。
+- Codex 入口：`.codex-plugin/plugin.json`，主要用于复用 `skills/`。
+
+当前完整能力以 Claude Code 运行时为准。Codex 可以使用核心 skill 能力；hooks 与 subagent 需要按 Codex 官方机制进行额外的项目级或用户级配置。
 
 ## 🎯 插件特性
 
 ### 1. 自动化 Git 工作流
+
 - **提交前验证**：自动检查仓库状态和用户配置
 - **规范提交信息**：基于更改内容生成标准化的提交信息
 - **项目配置**：为开源项目强制使用一致的 git 身份配置
 
 ### 2. 命令安全防护
+
 - **危险命令拦截**：阻止 potentially harmful 命令的执行
 - **模式检测**：拦截 `rm -rf`、系统破坏和其他风险操作
 - **覆盖能力**：允许通过显式确认执行合法的危险命令
 
 ### 3. Java 代码质量保证
+
 - **自动代码检查**：编辑 Java 文件后自动运行代码检查
 - **多工具支持**：Maven、Gradle、Checkstyle、Google Java Format 和 javac
 - **失败预防**：代码检查问题必须解决才能继续工作
 
 ### 4. 安全扫描
+
 - **密钥检测**：自动识别硬编码的凭证和 API 密钥
 - **提供商覆盖**：AWS、Google、GitHub、Slack、OpenAI 等
 - **智能遮蔽**：暴露模式而不暴露实际值
 
 ### 5. 线程池管理（Java 项目）
+
 - **自动依赖注入**：为 Java Maven 项目添加 `base-executor-starter`
 - **配置文件生成**：创建线程池配置
 - **业务代码生成**：生成优化的异步和定时任务实现
@@ -32,7 +45,8 @@
 
 ## 📦 安装
 
-### 开发环境安装
+### Claude Code 开发环境安装
+
 ```bash
 # 克隆插件仓库
 git clone https://github.com/whugeomatics/boot-extension-plugin.git
@@ -41,15 +55,38 @@ git clone https://github.com/whugeomatics/boot-extension-plugin.git
 cp -r boot-extension-plugin ~/.claude/plugins/
 ```
 
+### Codex 开发环境安装
+
+Codex 使用 `.codex-plugin/plugin.json` 识别插件，并通过 `.agents/plugins/marketplace.json` 暴露 marketplace
+条目。当前仓库采用单插件根目录布局，marketplace 中的 `source.path` 指向当前仓库根目录。
+
+Codex plugin manifest 不负责安装本项目的 Claude hooks 或 Claude subagent。若要在 Codex 中启用类似能力，需要人工配置：
+
+- Codex hooks：放在 `.codex/hooks.json`、`.codex/config.toml`、`~/.codex/hooks.json` 或 `~/.codex/config.toml`
+- Codex custom agents：放在 `.codex/agents/*.toml` 或 `~/.codex/agents/*.toml`
+
+```text
+boot-extension-plugin/
+├── .codex-plugin/plugin.json
+├── .agents/plugins/marketplace.json
+├── skills/
+├── agents/
+├── hooks/
+└── scripts/
+```
+
 ### 使用方式
-1. 启动 Claude Code
-2. 在 Spring Boot 项目中使用以下命令激活插件功能：
-   - `/git-commit-check` - Git 提交检查
-   - `/executor-dependency` - 线程池依赖管理
+
+1. 在 Claude Code 中安装/启用本插件，获得 skills、hooks、subagent 等完整能力
+2. 在 Codex 中安装/启用本插件，复用 `skills/` 中的核心能力；hooks/subagent 需另行配置
+3. 在 Spring Boot 项目中使用以下命令激活插件功能：
+    - `/git-commit-check` - Git 提交检查
+    - `/executor-dependency` - 线程池依赖管理
 
 ## 🛠️ 核心功能详解
 
 ### Git 工作流自动化
+
 ```bash
 # 使用规范提交
 git add .
@@ -60,20 +97,25 @@ git commit -m "feat: add new feature"
 ```
 
 **工作流程**：
+
 1. 用户触发 `git commit`、`git push` 或使用 `/commit`
 2. `/git-commit-check` 技能运行提交前验证
 3. 系统生成规范的提交信息
 4. 自动提交更改
 
 ### 线程池管理
+
 当代码中检测到线程池相关关键词时，插件会：
+
 1. 自动检测 Maven 项目
 2. 注入 `base-executor-starter` 依赖
 3. 生成线程池配置文件
 4. 创建优化的异步和定时任务示例代码
 
 ### 代码质量检查
+
 编辑 Java 文件后，插件会按优先级顺序尝试多种代码检查工具：
+
 1. Maven checkstyle（如果存在 pom.xml）
 2. Gradle checkstyle（如果存在 build.gradle）
 3. 独立 checkstyle 二进制文件
@@ -87,9 +129,15 @@ boot-extension-plugin/
 ├── .claude-plugin/               # 插件元数据
 │   ├── plugin.json              # 插件清单
 │   └── marketplace.json         # 市场/仓库配置
+├── .codex-plugin/                # Codex 插件元数据
+│   └── plugin.json              # Codex 插件清单，主要暴露 skills
+├── .agents/plugins/              # Codex marketplace 配置
+│   └── marketplace.json
 ├── .claude/skills/              # 自定义技能
 │   ├── test/                    # 集成测试技能
 │   └── verify/                  # 配置验证技能
+├── agents/                      # Claude Subagent 定义
+│   └── java-code-review/
 ├── skills/                      # 技能定义目录
 │   ├── executor-dependency/    # 线程池依赖管理
 │   ├── git-commit/              # 内部提交生成
@@ -107,38 +155,50 @@ boot-extension-plugin/
 ## 🔧 技能列表
 
 ### `/git-commit-check`
+
 - **用途**：所有 git 操作的唯一入口点
 - **触发器**：`git commit`、`git push`、`/commit`
 - **功能**：仓库验证、用户配置强制执行
 
 ### `/executor-dependency`
+
 - **用途**：Java 线程池依赖管理
 - **触发器**：线程池关键词、异步/并发代码模式
 - **功能**：自动检测 Maven 项目、注入依赖、生成配置
 
 ### `/verify`
+
 - **用途**：验证插件配置和技能定义
 - **功能**：检查 JSON 配置语法、验证 YAML 前置格式
 
 ### `/test`
+
 - **用途**：运行插件集成测试
 - **功能**：测试所有技能的基本功能、验证钩子脚本执行
 
 ## 📋 钩子系统
 
+当前 `hooks/hooks.json` 是 Claude Code hook 配置，使用 Claude Code 的 hook 事件与 `${CLAUDE_PLUGIN_ROOT}` 环境变量。Codex
+plugin manifest 不包含 hooks 字段；若要在 Codex 中复用这些脚本，需要按 Codex 官方 hooks 机制单独配置 `.codex/hooks.json` 或
+`.codex/config.toml`，并适配 Codex 的事件 payload。
+
 ### PreToolUse（命令执行前）
+
 - `scripts/command-guard.sh` - 危险命令拦截
 
 ### PostToolUse（文件编辑后）
+
 - `scripts/java-lint.sh` - Java 代码质量检查
 - `scripts/secret-scan.sh` - 安全扫描
 
 ### Stop（会话结束）
+
 - `scripts/session-summary.sh` - 会话摘要记录
 
 ## 🔐 安全特性
 
 ### 命令防护规则
+
 - 系统破坏防护
 - 磁盘操作拦截
 - 权限提升检测
@@ -147,6 +207,7 @@ boot-extension-plugin/
 - 关键文件保护
 
 ### 密钥扫描模式
+
 - AWS/GitHub/Slack token
 - 数据库凭证
 - API 密钥
@@ -156,20 +217,26 @@ boot-extension-plugin/
 ## 🚀 最佳实践
 
 ### 对于开发者
+
 1. 使用 `/commit` 进行标准化的 git 操作
 2. 确保 Java 项目遵循代码检查标准
 3. 将密钥存储在环境变量或密钥管理器中
 4. 使用提供的技能处理常见模式
 
 ### 对于插件维护者
+
 1. 定期更新钩子脚本
 2. 审查被拦截命令的误报
 3. 维护密钥扫描模式
 4. 更新代码检查工具配置
+5. 修改 `skills/` 时同时检查 Claude Code 与 Codex 是否仍能正确读取
+6. 不要把 Claude Code 专用 hooks 或 subagent 语义写进 Codex plugin manifest
+7. 若要支持 Codex hooks/agents，使用 `.codex/` 或 `~/.codex/` 下的官方配置文件
 
 ## 🎯 使用场景
 
 ### Spring Boot 项目初始化
+
 ```bash
 # 创建新的 Spring Boot 项目
 spring init --dependencies=web,actuator my-app
@@ -183,17 +250,18 @@ cd my-app
 ```
 
 ### 异步任务开发
+
 ```java
 // 当检测到以下模式时，插件会自动生成配置
 @Service
 public class OrderService {
-    
+
     // 异步处理订单
     @Async
     public void processOrder(Order order) {
         // 业务逻辑
     }
-    
+
     // 定时任务
     @Scheduled(fixedRate = 5000)
     public void reportCurrentTime() {
@@ -226,15 +294,21 @@ public class OrderService {
 ## 🆘 故障排除
 
 ### 常见问题
-1. **技能无法识别**：检查 `.claude-plugin/plugin.json` 配置
-2. **钩子脚本不执行**：确认脚本有执行权限
-3. **Git 提交失败**：检查仓库状态和用户配置
+
+1. **Claude 技能无法识别**：检查 `.claude-plugin/plugin.json` 配置
+2. **Codex 技能无法识别**：检查 `.codex-plugin/plugin.json` 的 `skills` 路径和 `.agents/plugins/marketplace.json` 的
+   `source.path`
+3. **Claude 钩子脚本不执行**：确认 `hooks/hooks.json`、`${CLAUDE_PLUGIN_ROOT}` 和脚本执行权限
+4. **Codex 中没有自动 hooks 行为**：这是预期现状，需要额外配置 `.codex/hooks.json` 或 `.codex/config.toml`
+5. **Git 提交失败**：检查仓库状态和用户配置
 
 ### 调试方法
+
 1. 使用 `/verify` 验证配置
-2. 查看 Claude Code 日志
+2. 查看 Claude Code 或 Codex 运行时日志
 3. 手动运行钩子脚本进行测试
 
 ---
 
-*这个插件展示了 Claude Code 的扩展能力，通过自定义技能和钩子系统为 Spring Boot 开发提供自动化的工作流解决方案。*
+*这个插件以 Claude Code 完整插件能力为主，同时通过 Codex plugin manifest 复用核心 skills，为 Spring Boot
+开发提供自动化的工作流解决方案。*

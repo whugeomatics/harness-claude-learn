@@ -1,17 +1,24 @@
 # CLAUDE.md
 
-This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
+This file provides guidance for this Claude Code-first plugin repository. Codex can reuse the shared skills through `.codex-plugin/plugin.json`, but Codex hooks and custom agents require separate Codex configuration.
 
 ## Project Overview
 
-This is a Claude Code plugin project that enhances Spring Boot development workflows. The plugin provides automated git workflows, Java code quality enforcement, and security scanning capabilities.
+This is a Claude Code-first AI coding plugin for Spring Boot development workflows. It provides automated git checks, conventional commit generation, Java executor dependency guidance, Java code quality enforcement, security scanning, session summaries, and a Java code review subagent.
+
+Codex support is intentionally narrower: `.codex-plugin/plugin.json` exposes the shared `skills/` directory so Codex can reuse the core skill instructions. Claude Code hooks and Claude-style subagents are not automatically installed by the Codex plugin manifest.
 
 ## Plugin Architecture
 
-- **Plugin Type**: Claude Code extension plugin
-- **Entry Point**: `.claude-plugin/plugin.json`
+- **Primary Plugin Type**: Claude Code extension plugin
+- **Claude Code Entry Point**: `.claude-plugin/plugin.json`
+- **Codex Entry Point**: `.codex-plugin/plugin.json` for skill reuse
+- **Codex Marketplace**: `.agents/plugins/marketplace.json`
 - **Skills Directory**: `skills/` - Contains custom skills for enhanced development workflows
-- **Hooks Directory**: `scripts/` - Contains shell scripts for automated tool events
+- **Agents Directory**: `agents/` - Contains Claude-style subagent definitions
+- **Hooks Directory**: `hooks/` and `scripts/` - Contains Claude hook metadata and reusable shell scripts
+
+Keep shared skill behavior in `skills/`. Keep Claude-specific hooks/subagents in the existing Claude-oriented structure. If Codex needs equivalent hooks or agents, add `.codex/hooks.json`, `.codex/config.toml`, or `.codex/agents/*.toml` according to Codex's own configuration model instead of adding unsupported fields to `.codex-plugin/plugin.json`.
 
 ## Development Workflow
 
@@ -31,12 +38,16 @@ Automated hooks run on specific tool events:
   - `scripts/secret-scan.sh` - Scans for hardcoded credentials
 - **Stop**: `scripts/session-summary.sh` - Logs session summaries
 
+Current `hooks/hooks.json` uses Claude Code hook naming and `${CLAUDE_PLUGIN_ROOT}`. Codex plugin manifests do not configure hooks. To reuse these scripts in Codex, create separate Codex hook configuration under `.codex/` or `~/.codex/` and adapt the event payload as needed.
+
 ## Plugin Development
 
 ### Building and Testing
 - No traditional build system - this is a plugin project
-- Test by activating the plugin in Claude Code
-- Installation: Deploy to Claude Code plugin directory
+- Test complete behavior by activating the plugin in Claude Code
+- Test Codex skill reuse when changing `skills/` or `.codex-plugin/plugin.json`
+- Claude installation: deploy through `.claude-plugin/plugin.json` / Claude marketplace
+- Codex installation: deploy through `.codex-plugin/plugin.json` / `.agents/plugins/marketplace.json`; hooks and custom agents need manual Codex configuration
 - Use `/verify` to check configuration syntax
 - Use `/test` to run integration tests
 
@@ -52,8 +63,11 @@ The project uses GitHub for version control. Consider installing GitHub CLI (`gh
 
 - Skills are invoked with `/skill-name` syntax
 - Hooks run automatically on tool events
-- Plugin configuration is in `.claude-plugin/` directory
+- Claude plugin configuration is in `.claude-plugin/`
+- Codex plugin configuration is in `.codex-plugin/` and currently exposes shared skills
+- Codex marketplace configuration is in `.agents/plugins/marketplace.json`
 - Skills and scripts can be modified independently
-- Always test skills in development environment before deployment
+- Always test shared skills in both Claude Code and Codex when they are changed
+- Do not add unsupported `hooks` or `agents` fields to `.codex-plugin/plugin.json`
 - Run `/verify` after making changes to configuration files
 - Use `/test` to validate all functionality after updates

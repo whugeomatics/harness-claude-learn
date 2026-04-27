@@ -42,7 +42,7 @@ correct for open source projects, before any commit takes place.
 **Action**: Execute the guard script from the skill's directory:
 
 ```bash
-bash .claude/skills/git-commit-check/git-commit-check.sh
+bash ./skills/git-commit-check/git-commit-check.sh
 ```
 
 This single script performs two internal checks in sequence:
@@ -79,7 +79,7 @@ a new context. All bash commands run in the same working directory as Step 1.
 
 Concretely:
 
-1. Locate and read `.claude/skills/git-commit/SKILL.md`
+1. Locate and read `./skills/git-commit/SKILL.md`
 2. Follow its Workflow section: Analyze Diff → Stage Files → Generate Commit Message → Execute Commit
 3. All bash commands run in the same working directory as Step 1
 
@@ -119,7 +119,7 @@ User: "git commit" / "git push" / "/commit"
 
 ## Script Reference
 
-**File**: `.claude/skills/git-commit-check/git-commit-check.sh`
+**File**: `./skills/git-commit-check/git-commit-check.sh`
 
 | Responsibility     | Handled by             |
 |--------------------|------------------------|
